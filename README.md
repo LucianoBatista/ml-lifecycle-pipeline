@@ -12,13 +12,13 @@ Notebooks are hard to maintain, difficult to diff, and sometimes too large to fi
 
 All that said, let's understand how you can reproduce this project.
 
-## The code
+## The code :technologist:
 
 This code is from **ML School - SageMaker Training by Santiago**. I'm just creating a CLI to run it step by step and also using a local machine to test those workflows before sending it to the cloud.
 
 The original code was made in a notebook, and for me, this way was not too intuitive to completely separate the SageMaker concepts from the ML stuff.
 
-## What good stuff do we have here?
+## What good stuff do we have here? :tada:
 
 - **Pre-commit**: every commit will trigger some validation on our code and bring style and linter for the whole project in an automatic way.
 - **Code-completion**: by developing with the flexibility to code in an IDE, we can use GitHub Copilot and all benefits of code-completion.
@@ -26,7 +26,7 @@ The original code was made in a notebook, and for me, this way was not too intui
 - **Configuration**: we're centralizing all project configurations in one specific module.
 - **Patterns**: possibility to create different templates for different use cases (computer vision, NLP, traditional ML...) and rapidly shift from development to production.
 
-## Requirements
+## Requirements :wrench:
 
 Basically, you need to be logged into your AWS account using the `aws-cli`.
 
@@ -36,7 +36,7 @@ For those who take the training, after running the **setup notebook**, you'll ha
 
 Using this [medium article](https://medium.com/@harrietty/setting-up-your-aws-account-the-right-way-dfa9a6b5cfbb), you can correctly set up your account and `aws-cli`.
 
-### Environment Variables
+### Environment Variables :closed_lock_with_key:
 
 It is very normal that a lot of projects will need some sensitive information to work properly, like database passwords or API keys for proprietary APIs... One way to manage this is using **environment variables**.
 
@@ -46,13 +46,13 @@ To indicate which env variables I'm using here, I created a file called `.exampl
 
 > The project will not upload those values to the repo because the `.env` file was added to the `.gitignore`.
 
-### The data
+### The data :chart_with_upwards_trend:
 
 You'll need to create a data folder, right after you clone the project, and then put the `data.csv` there. As a best practice (files can go wildly big), we'll not be versioning the data folder on GitHub.
 
 You can go fancy and use [DVC](https://dvc.org) for data versioning, but I'll keep it simple for now.
 
-## Show me how to run it!
+## Show me how to run it! :fire:
 
 After cloning the project, fill up the env variables and put the data in the correct place, you just need to go to the terminal of the project and run:
 
@@ -68,12 +68,12 @@ pipenv shell
 python src/main.py pipelines run-local --session session1
 ```
 
-## Expected results
+## Expected results :sparkles:
 
 By running locally, you'll see a lot of stuff going into the data folder. Basically everything that you configured for the outputs on your pipeline.
 
 By running on SageMaker, you'll see a new job on the `processing` option on the AWS SageMaker console, and you can investigate what is happening.
 
-## Next Steps
+## Next Steps :memo:
 
 For now, this is a work in progress, and I'm still pulling together the other sessions. Above all, this is just part of my personal learning process, and if you want, feel free to fork the repository and make your own changes.
