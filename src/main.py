@@ -11,7 +11,3 @@ def create_typer_app() -> Typer:
 if __name__ == "__main__":
     app = create_typer_app()
     app()
-#     run(
-#         "session1",
-#         "arn:aws:iam::726872986818:role/service-role/SageMaker-MLOpsEngineer",
-#     )
