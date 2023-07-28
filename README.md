@@ -76,4 +76,11 @@ By running on SageMaker, you'll see a new job on the `processing` option on the 
 
 ## Next Steps :memo:
 
+- [x] Session 1
+- [x] Session 2
+- [ ] Session 3
+- [ ] Session 4
+- [ ] Session 5
+- [ ] Session 6
+
 For now, this is a work in progress, and I'm still pulling together the other sessions. Above all, this is just part of my personal learning process, and if you want, feel free to fork the repository and make your own changes.
