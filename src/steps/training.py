@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # that you can capture here. Here is the full list:
     # https://github.com/aws/sagemaker-training-toolkit/blob/master/src/sagemaker_training/params.py
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base_directory", type=str, default="/opt/ml/")
+    parser.add_argument("--base_directory", type=str, default="/opt/ml/processing")
     parser.add_argument(
         "--train_path", type=str, default=os.environ.get("SM_CHANNEL_TRAIN", None)
     )

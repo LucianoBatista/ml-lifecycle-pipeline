@@ -17,11 +17,11 @@ from sklearn.model_selection import train_test_split
 LOCAL = os.getenv("LOCAL", False)
 
 if LOCAL:
-    BASE_FILEPATH = "/opt/ml/processing"
-    DATA_FILEPATH = "/opt/ml/processing/input/data.csv"
-else:
     BASE_FILEPATH = "/data"
     DATA_FILEPATH = "/data/data.csv"
+else:
+    BASE_FILEPATH = "/opt/ml/processing"
+    DATA_FILEPATH = "/opt/ml/processing/input/data.csv"
 
 
 # what kind of data do we have with train, validation and test?

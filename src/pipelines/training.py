@@ -3,13 +3,13 @@ from sagemaker.workflow.steps import TrainingStep
 from sagemaker.inputs import TrainingInput
 
 
-def create_tensorflow_estimator(role, CODE_FOLDER):
+def create_tensorflow_estimator(role: str, script_path: str):
     estimator = TensorFlow(
-        entry_point=f"{CODE_FOLDER}/train.py",
+        entry_point=script_path,
         hyperparameters={"epochs": 50, "batch_size": 32},
-        framework_version="2.6",
+        framework_version="2.12",
         instance_type="ml.m5.large",
-        py_version="py38",
+        py_version="py310",
         instance_count=1,
         script_mode=True,
         # The default profiler rule includes a timestamp which will change each time

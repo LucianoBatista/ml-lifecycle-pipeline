@@ -24,7 +24,23 @@ def run(session: Optional[str] = "session1"):
 def run_local(session: Optional[str] = "session1"):
     BASE_FILEPATH = "data"
     DATA_FILEPATH = "data/data.csv"
+    TRAIN_PATH = "data/train"
+    VALIDATION_PATH = "data/validation"
+    EPOCHS = 10
+
     if session == "session1":
         from steps.preprocessing import preprocess
 
         preprocess(base_dir=BASE_FILEPATH, data_filepath=DATA_FILEPATH)
+
+    elif session == "session2":
+        from steps.training import train
+        from steps.preprocessing import preprocess
+
+        preprocess(base_dir=BASE_FILEPATH, data_filepath=DATA_FILEPATH)
+        train(
+            base_directory=BASE_FILEPATH,
+            train_path=TRAIN_PATH,
+            validation_path=VALIDATION_PATH,
+            epochs=EPOCHS,
+        )
