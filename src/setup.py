@@ -1,5 +1,6 @@
 from sagemaker.workflow.pipeline import Pipeline
-from pipelines import preprocessing_setup, base_pipe_settings, training
+from pipelines import preprocessing_setup, base_pipe_settings, training, tuning
+from sagemaker.workflow.pipeline_context import PipelineSession
 
 
 # For now, we're going to have a lot of duplication here, because the ideia
@@ -10,6 +11,7 @@ def pipe_1(role: str):
     dataset_location = base_pipe_settings.get_dataset_location_param()
     preprocessor_destination = base_pipe_settings.get_preprocessor_destination()
     pipeline_definition_config = base_pipe_settings.get_pipeline_definition()
+    _ = PipelineSession()
 
     sklearn_processosr = preprocessing_setup.create_sklearn_processor(
         job_name="penguins-preprocess-data",
@@ -44,13 +46,16 @@ def pipe_1(role: str):
 
 def pipe_2(
     role: str,
-    USE_TUNING_STEP: bool = False,
+    USE_TUNING_STEP: bool = True,
 ):
+    # base config
     dataset_location = base_pipe_settings.get_dataset_location_param()
     preprocessor_destination = base_pipe_settings.get_preprocessor_destination()
     pipeline_definition_config = base_pipe_settings.get_pipeline_definition()
     cache_config = base_pipe_settings.get_cache_config()
+    sagemaker_session = PipelineSession()
 
+    # preprocessing step
     sklearn_processosr = preprocessing_setup.create_sklearn_processor(
         job_name="penguins-preprocess-data",
         framework_version="0.23-1",
@@ -68,16 +73,26 @@ def pipe_2(
         script_path="src/steps/preprocessing.py",
     )
 
+    # training and tuning step
     tensorflow_estimator = training.create_tensorflow_estimator(
-        role, "src/steps/training.py"
+        role, "src/steps/training.py", sagemaker_session
     )
 
-    train_model_step = training.create_training_step(
-        estimator=tensorflow_estimator,
-        preprocess_data_step=processing_step,
-        cache_config=cache_config,
-    )
+    if USE_TUNING_STEP:
+        tuner = tuning.create_tuner(tensorflow_estimator)
+        train_or_tune_step = tuning.create_tuner_step(
+            preprocess_data_step=processing_step,
+            tuner=tuner,
+            cache_config=cache_config,
+        )
+    else:
+        train_or_tune_step = training.create_training_step(
+            estimator=tensorflow_estimator,
+            preprocess_data_step=processing_step,
+            cache_config=cache_config,
+        )
 
+    # pipeline
     session2_pipeline = Pipeline(
         name="penguins-session2-pipeline",
         parameters=[
@@ -86,7 +101,7 @@ def pipe_2(
         ],
         steps=[
             processing_step,
-            train_model_step,
+            train_or_tune_step,
         ],
         pipeline_definition_config=pipeline_definition_config,
     )

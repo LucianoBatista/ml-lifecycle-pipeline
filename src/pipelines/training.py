@@ -3,7 +3,7 @@ from sagemaker.workflow.steps import TrainingStep
 from sagemaker.inputs import TrainingInput
 
 
-def create_tensorflow_estimator(role: str, script_path: str):
+def create_tensorflow_estimator(role: str, script_path: str, pipeline_session):
     estimator = TensorFlow(
         entry_point=script_path,
         hyperparameters={"epochs": 50, "batch_size": 32},
@@ -17,6 +17,7 @@ def create_tensorflow_estimator(role: str, script_path: str):
         # profiling, we can disable it to take advantage of caching.
         disable_profiler=True,
         role=role,
+        sagemaker_session=pipeline_session,
     )
     return estimator
 

@@ -29,21 +29,22 @@ def create_tuner(estimator):
 def create_tuner_step(preprocess_data_step, tuner, cache_config):
     tune_model_step = TuningStep(
         name="tune-model",
-        tuner=tuner,
-        inputs={
-            "train": TrainingInput(
-                s3_data=preprocess_data_step.properties.ProcessingOutputConfig.Outputs[
-                    "train"
-                ].S3Output.S3Uri,
-                content_type="text/csv",
-            ),
-            "validation": TrainingInput(
-                s3_data=preprocess_data_step.properties.ProcessingOutputConfig.Outputs[
-                    "validation"
-                ].S3Output.S3Uri,
-                content_type="text/csv",
-            ),
-        },
+        step_args=tuner.fit(
+            inputs={
+                "train": TrainingInput(
+                    s3_data=preprocess_data_step.properties.ProcessingOutputConfig.Outputs[
+                        "train"
+                    ].S3Output.S3Uri,
+                    content_type="text/csv",
+                ),
+                "validation": TrainingInput(
+                    s3_data=preprocess_data_step.properties.ProcessingOutputConfig.Outputs[
+                        "validation"
+                    ].S3Output.S3Uri,
+                    content_type="text/csv",
+                ),
+            }
+        ),
         cache_config=cache_config,
     )
     return tune_model_step
