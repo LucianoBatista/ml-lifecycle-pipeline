@@ -1,21 +1,18 @@
 import random
-
 from datetime import datetime
-from IPython.display import JSON
 
+from IPython.display import JSON
+from sagemaker.drift_check_baselines import DriftCheckBaselines
+from sagemaker.model import Model
+from sagemaker.model_monitor.dataset_format import DatasetFormat
+from sagemaker.s3 import S3Uploader
 from sagemaker.workflow.check_job_config import CheckJobConfig
+from sagemaker.workflow.execution_variables import ExecutionVariables
+from sagemaker.workflow.parameters import ParameterBoolean
 from sagemaker.workflow.quality_check_step import (
     DataQualityCheckConfig,
     QualityCheckStep,
 )
-from sagemaker.workflow.execution_variables import ExecutionVariables
-
-from sagemaker.drift_check_baselines import DriftCheckBaselines
-from sagemaker.workflow.parameters import ParameterBoolean
-from sagemaker.model import Model
-from sagemaker.model_monitor.dataset_format import DatasetFormat
-from sagemaker.s3 import S3Uploader
-
 
 DATA_QUALITY_LOCATION = f"{S3_LOCATION}/monitoring/data-quality"
 files = S3Downloader.list(data_capture_destination.default_value)[:3]

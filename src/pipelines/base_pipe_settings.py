@@ -1,6 +1,7 @@
 from sagemaker.workflow.parameters import ParameterString
-from sagemaker.workflow.steps import CacheConfig
 from sagemaker.workflow.pipeline_definition_config import PipelineDefinitionConfig
+from sagemaker.workflow.steps import CacheConfig
+
 from config.config import get_settings
 
 S3_LOCATION = get_settings().s3_location

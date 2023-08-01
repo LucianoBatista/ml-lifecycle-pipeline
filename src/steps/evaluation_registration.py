@@ -1,12 +1,11 @@
 import json
 import tarfile
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-
-from pathlib import Path
-from tensorflow import keras
 from sklearn.metrics import accuracy_score
-
+from tensorflow import keras
 
 MODEL_PATH = "/opt/ml/processing/model/"
 TEST_PATH = "/opt/ml/processing/test/"

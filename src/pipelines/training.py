@@ -1,6 +1,6 @@
+from sagemaker.inputs import TrainingInput
 from sagemaker.tensorflow import TensorFlow
 from sagemaker.workflow.steps import TrainingStep
-from sagemaker.inputs import TrainingInput
 
 
 def create_tensorflow_estimator(role: str, script_path: str, pipeline_session):

@@ -1,5 +1,6 @@
-import commands
 from typer import Typer
+
+import commands
 
 
 def create_typer_app() -> Typer:

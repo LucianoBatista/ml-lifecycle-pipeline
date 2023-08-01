@@ -1,0 +1,21 @@
+repos:
+  #  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    # Ruff version.
+    #  rev: "v0.0.257"
+    # hooks:
+    #  - id: ruff
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        stages: [commit]
+        language: system
+        entry: isort
+        types: [python]
+        args: [--profile, black]
+      - id: black
+        name: black
+        stages: [commit]
+        language: system
+        entry: black
+        types: [python]

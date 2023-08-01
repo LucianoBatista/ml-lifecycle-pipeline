@@ -16,8 +16,11 @@ keras = "==2.13.1"
 typer = "==0.9.0"
 typer-cli = "*"
 python-dotenv = "==1.0.0"
+pre-commit = "==3.3.3"
 
 [dev-packages]
+black = "*"
+isort = "*"
 
 [requires]
 python_version = "3.9"

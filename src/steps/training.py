@@ -1,15 +1,13 @@
-import os
 import argparse
+import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
-from pathlib import Path
-from sklearn.metrics import accuracy_score
-
-from keras.models import Sequential
 from keras.layers import Dense
+from keras.models import Sequential
 from keras.optimizers import SGD
+from sklearn.metrics import accuracy_score
 
 
 def train(base_directory, train_path, validation_path, epochs=50, batch_size=32):

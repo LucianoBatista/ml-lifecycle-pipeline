@@ -1,8 +1,8 @@
-from sagemaker.model_metrics import ModelMetrics, MetricsSource
-from sagemaker.workflow.properties import PropertyFile
+from sagemaker.model_metrics import MetricsSource, ModelMetrics
 from sagemaker.processing import ProcessingInput, ProcessingOutput
-from sagemaker.workflow.steps import ProcessingStep
 from sagemaker.workflow.functions import Join
+from sagemaker.workflow.properties import PropertyFile
+from sagemaker.workflow.steps import ProcessingStep
 
 USE_TUNING_STEP = False
 

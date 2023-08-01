@@ -1,14 +1,15 @@
 from sagemaker.workflow.pipeline import Pipeline
+from sagemaker.workflow.pipeline_context import PipelineSession
+
 from pipelines import (
-    preprocessing_setup,
     base_pipe_settings,
+    checks,
+    evaluate,
+    preprocessing_setup,
+    registration,
     training,
     tuning,
-    evaluate,
-    checks,
-    registration,
 )
-from sagemaker.workflow.pipeline_context import PipelineSession
 
 
 # For now, we're going to have a lot of duplication here, because the ideia

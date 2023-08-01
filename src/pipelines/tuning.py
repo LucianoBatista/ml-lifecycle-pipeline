@@ -1,6 +1,6 @@
+from sagemaker.inputs import TrainingInput
 from sagemaker.tuner import HyperparameterTuner, IntegerParameter
 from sagemaker.workflow.steps import TuningStep
-from sagemaker.inputs import TrainingInput
 
 
 def create_tuner(estimator):

@@ -1,6 +1,7 @@
 import json
-import boto3
 import time
+
+import boto3
 
 sagemaker = boto3.client("sagemaker")
 

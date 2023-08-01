@@ -1,9 +1,7 @@
 from sagemaker.workflow.condition_step import ConditionStep
 from sagemaker.workflow.conditions import ConditionGreaterThanOrEqualTo
-from sagemaker.workflow.condition_step import ConditionStep
 from sagemaker.workflow.fail_step import FailStep
-from sagemaker.workflow.functions import JsonGet
-from sagemaker.workflow.functions import Join
+from sagemaker.workflow.functions import Join, JsonGet
 from sagemaker.workflow.parameters import ParameterFloat
 
 

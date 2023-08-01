@@ -1,6 +1,7 @@
-from functools import lru_cache
-from attr import dataclass
 import os
+from functools import lru_cache
+
+from attr import dataclass
 from dotenv import load_dotenv
 
 load_dotenv()

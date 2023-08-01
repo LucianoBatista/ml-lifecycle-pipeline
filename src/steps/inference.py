@@ -1,13 +1,12 @@
-import os
 import json
+import os
+from pathlib import Path
+from pickle import load
+
 import boto3
-import requests
 import numpy as np
 import pandas as pd
-
-from pickle import load
-from pathlib import Path
-
+import requests
 
 s3 = boto3.resource("s3")
 

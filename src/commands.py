@@ -1,7 +1,9 @@
-from typer import Typer
-from setup import pipe_1, pipe_2
 from typing import Optional
+
+from typer import Typer
+
 from config.config import get_settings
+from setup import pipe_1, pipe_2
 
 app = Typer()
 
@@ -34,8 +36,8 @@ def run_local(session: Optional[str] = "session1"):
         preprocess(base_dir=BASE_FILEPATH, data_filepath=DATA_FILEPATH)
 
     elif session == "session2":
-        from steps.training import train
         from steps.preprocessing import preprocess
+        from steps.training import train
 
         preprocess(base_dir=BASE_FILEPATH, data_filepath=DATA_FILEPATH)
         train(

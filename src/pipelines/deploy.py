@@ -1,9 +1,8 @@
-from sagemaker.tensorflow.model import TensorFlowModel
-from sagemaker.workflow.functions import Join
 from pathlib import Path
 
+from sagemaker.tensorflow.model import TensorFlowModel
+from sagemaker.workflow.functions import Join
 from sagemaker.workflow.model_step import ModelStep
-
 
 USE_TUNING_STEP = False
 ENDPOINT_CODE_FOLDER = Path("src/steps/endpoint")
