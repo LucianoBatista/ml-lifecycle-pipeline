@@ -9,10 +9,10 @@ import pandas as pd
 import requests
 
 s3 = boto3.resource("s3")
-
-ENDPOINT_CODE_FOLDER = CODE_FOLDER / "endpoint"
-Path(ENDPOINT_CODE_FOLDER).mkdir(parents=True, exist_ok=True)
-sys.path.append(f"./{ENDPOINT_CODE_FOLDER}")
+#
+# ENDPOINT_CODE_FOLDER = CODE_FOLDER / "endpoint"
+# Path(ENDPOINT_CODE_FOLDER).mkdir(parents=True, exist_ok=True)
+# sys.path.append(f"./{ENDPOINT_CODE_FOLDER}")
 
 
 def handler(

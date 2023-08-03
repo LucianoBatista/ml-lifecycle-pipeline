@@ -18,10 +18,11 @@ class Settings:
     model_package_group_name = "penguins"
 
     # scripts
-    train_script_path = "src/step/train.py"
-    evaluate_script_path = "src/step/evaluate.py"
-    lambda_script_path = "src/step/lambda.py"
-    endpoint_code_path = "src/step"
+    preprocessor_script_path = "src/steps/preprocessing.py"
+    train_script_path = "src/steps/training.py"
+    evaluate_script_path = "src/steps/evaluate.py"
+    lambda_script_path = "src/steps/lambda.py"
+    endpoint_code_path = "src/steps/inference"
 
 
 @lru_cache()

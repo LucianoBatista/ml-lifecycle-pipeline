@@ -1,3 +1,6 @@
+import json
+
+import boto3
 from sagemaker.drift_check_baselines import DriftCheckBaselines, MetricsSource
 from sagemaker.inputs import TrainingInput
 from sagemaker.lambda_helper import Lambda
@@ -47,13 +50,13 @@ class Pipe:
         self.s3_location = get_settings().s3_location
         self.data_quality_location = get_settings().data_quality_location
         self.model_package_group_name = get_settings().model_package_group_name
+        self.preprocessor_script_path = get_settings().preprocessor_script_path
         self.train_script_path = get_settings().train_script_path
         self.evaluate_script_path = get_settings().evaluate_script_path
         self.lambda_script_path = get_settings().lambda_script_path
         self.endpoint_code_path = get_settings().endpoint_code_path
         # base config used across all steps
         self.dataset_location = pipe_utils.get_dataset_location_param()
-        self.preprocessor_destination = pipe_utils.get_preprocessor_destination()
         self.pipeline_definition_config = pipe_utils.get_pipeline_definition()
         self.cache_config = pipe_utils.get_cache_config()
         self.sagemaker_session = PipelineSession()
@@ -93,9 +96,9 @@ class Pipe:
                 "epochs": 50,
                 "batch_size": 32,
             },
-            framework_version="2.6",
+            framework_version="2.11",
             instance_type="ml.m5.large",
-            py_version="py38",
+            py_version="py39",
             instance_count=1,
             script_mode=True,
             # The default profiler rule includes a timestamp which will change each time
@@ -131,6 +134,44 @@ class Pipe:
         )
         return tuner
 
+    def _create_lambda_role(self, role_name):
+        iam_client = boto3.client("iam")
+        try:
+            response = iam_client.create_role(
+                RoleName=role_name,
+                AssumeRolePolicyDocument=json.dumps(
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Principal": {"Service": "lambda.amazonaws.com"},
+                                "Action": "sts:AssumeRole",
+                            }
+                        ],
+                    }
+                ),
+                Description="Lambda Pipeline Role",
+            )
+
+            role_arn = response["Role"]["Arn"]
+
+            iam_client.attach_role_policy(
+                RoleName=role_name,
+                PolicyArn="arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+            )
+
+            iam_client.attach_role_policy(
+                PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
+                RoleName=role_name,
+            )
+
+            return role_arn
+
+        except iam_client.exceptions.EntityAlreadyExistsException:
+            response = iam_client.get_role(RoleName=role_name)
+            return response["Role"]["Arn"]
+
     def preprocessing(
         self,
         job_name: str,
@@ -138,7 +179,6 @@ class Pipe:
         instance_type: str,
         instance_count: int,
         step_name: str,
-        script_path: str,
     ):
         sklearn_processor = SKLearnProcessor(
             base_job_name=job_name,
@@ -166,12 +206,10 @@ class Pipe:
                 ProcessingOutput(
                     output_name="pipeline",
                     source="/opt/ml/processing/pipeline",
-                    destination=self.preprocessor_destination,
                 ),
                 ProcessingOutput(
                     output_name="classes",
                     source="/opt/ml/processing/classes",
-                    destination=self.preprocessor_destination,
                 ),
                 ProcessingOutput(
                     output_name="train-baseline",
@@ -182,7 +220,7 @@ class Pipe:
                     source="/opt/ml/processing/test-baseline",
                 ),
             ],
-            code=script_path,
+            code=self.preprocessor_script_path,
             cache_config=self.cache_config,
         )
 
@@ -331,7 +369,7 @@ class Pipe:
                 on=" ",
                 values=[
                     "Execution failed because the model's accuracy was lower than",
-                    accuracy_threshold,
+                    self.param_accuracy_threshold,
                 ],
             ),
         )
@@ -342,7 +380,7 @@ class Pipe:
                 property_file=self.property_evaluation_report,
                 json_path="metrics.accuracy.value",
             ),
-            right=accuracy_threshold,
+            right=self.param_accuracy_threshold,
         )
         condition_step = ConditionStep(
             name="check-model-accuracy",
@@ -358,7 +396,12 @@ class Pipe:
         )
         return condition_step
 
-    def _model(self, tune_model_step: TuningStep, train_model_step: TrainingStep):
+    def _model(
+        self,
+        preprocess_data_step,
+        tune_model_step: TuningStep,
+        train_model_step: TrainingStep,
+    ):
         model = TensorFlowModel(
             name="penguins",
             model_data=(
@@ -397,9 +440,12 @@ class Pipe:
         return model
 
     def create_model_step(
-        self, tune_model_step: TuningStep, train_model_step: TrainingStep
+        self,
+        preprocess_data_step,
+        tune_model_step: TuningStep,
+        train_model_step: TrainingStep,
     ):
-        model = self._model(tune_model_step, train_model_step)
+        model = self._model(preprocess_data_step, tune_model_step, train_model_step)
 
         create_model_step = ModelStep(
             name="create",
@@ -440,12 +486,13 @@ class Pipe:
 
     def register(
         self,
+        preprocess_data_step,
         data_quality_baseline_step,
         model_quality_baseline_step,
         train_model_step: TrainingStep,
         tune_model_step: TuningStep,
     ):
-        model = self._model(tune_model_step, train_model_step)
+        model = self._model(preprocess_data_step, tune_model_step, train_model_step)
 
         model_metrics = ModelMetrics(
             model_data_statistics=MetricsSource(
@@ -535,9 +582,12 @@ class Pipe:
         return model_quality_baseline_step
 
     def deploy(self, register_model_step: ModelStep):
+        lambda_role = self._create_lambda_role("lambda-pipeline-role")
+
+        print(lambda_role)
         deploy_fn = Lambda(
             function_name="deploy_fn",
-            execution_role_arn=self.role,
+            execution_role_arn=lambda_role,
             script=self.lambda_script_path,
             handler="lambda.lambda_handler",
             timeout=600,

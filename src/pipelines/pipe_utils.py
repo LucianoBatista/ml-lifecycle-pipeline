@@ -24,14 +24,6 @@ def get_dataset_location_param():
     return dataset_location
 
 
-def get_preprocessor_destination():
-    preprocessor_destination = ParameterString(
-        name="preprocessor_destination",
-        default_value=f"{S3_LOCATION}/preprocessing",
-    )
-    return preprocessor_destination
-
-
 def get_pipeline_definition():
     pipeline_definition_config = PipelineDefinitionConfig(use_custom_job_prefix=True)
     return pipeline_definition_config

@@ -1,48 +1,77 @@
-from typing import Optional
-
+from sagemaker.workflow.pipeline import Pipeline
 from typer import Typer
 
-from config.config import get_settings
-from setup import pipe_1, pipe_2
+from pipelines.pipe import Pipe
 
 app = Typer()
 
-SESSION_DICT = {"session1": pipe_1, "session2": pipe_2}
-
 
 @app.command()
-def run(session: Optional[str] = "session1"):
-    # env variables
-    role = get_settings().execution_role
+def run():
+    pipe_obj = Pipe()
+    # initiating all the steps
+    process_data_step = pipe_obj.preprocessing(
+        job_name="penguins-preprocess-data-step",
+        framework_version="0.23-1",
+        instance_type="ml.t3.medium",
+        instance_count=1,
+        step_name="PreprocessDataStep",
+    )
+    data_quality_baseline_step = pipe_obj.data_quality(process_data_step)
+    tune_model_step = pipe_obj.tuning(process_data_step)
+    train_model_step = pipe_obj.training(process_data_step)
+    evaluate_model_step = pipe_obj.evaluation(
+        process_data_step, train_model_step, tune_model_step
+    )
+    create_model_step = pipe_obj.create_model_step(
+        process_data_step, tune_model_step, train_model_step
+    )
+    generate_test_data_step = pipe_obj.test_predictions(
+        process_data_step, create_model_step
+    )
+    model_quality_step = pipe_obj.model_quality(
+        generate_test_data_step,
+    )
+    register_model_step = pipe_obj.register(
+        process_data_step,
+        data_quality_baseline_step,
+        model_quality_step,
+        train_model_step,
+        tune_model_step,
+    )
+    deploy = pipe_obj.deploy(register_model_step)
 
-    # upserting the pipeline
-    pipeline = SESSION_DICT[session]
-    pipeline_to_run = pipeline(role)
-    pipeline_to_run.upsert(role_arn=role)
-    pipeline_to_run.start()
+    condition_step = pipe_obj.condition(
+        evaluate_model_step=evaluate_model_step,
+        create_model_step=create_model_step,
+        generate_test_predictions_step=generate_test_data_step,
+        model_quality_baseline_step=model_quality_step,
+        register_model_step=register_model_step,
+        deploy_step=deploy,
+    )
 
+    # Create a pipeline
+    full_session_pipeline = Pipeline(
+        name="penguins-session6-pipeline",
+        parameters=[
+            pipe_obj.dataset_location,
+            pipe_obj.param_data_capture_percentage,
+            pipe_obj.param_data_capture_destination,
+            pipe_obj.param_accuracy_threshold,
+        ],
+        steps=[
+            process_data_step,
+            data_quality_baseline_step,
+            tune_model_step if pipe_obj.use_tunning_step else train_model_step,
+            evaluate_model_step,
+            condition_step,
+        ],
+        pipeline_definition_config=pipe_obj.pipeline_definition_config,
+        sagemaker_session=pipe_obj.sagemaker_session,
+    )
 
-@app.command()
-def run_local(session: Optional[str] = "session1"):
-    BASE_FILEPATH = "data"
-    DATA_FILEPATH = "data/data.csv"
-    TRAIN_PATH = "data/train"
-    VALIDATION_PATH = "data/validation"
-    EPOCHS = 10
+    # Uploading the pipeline
+    full_session_pipeline.upsert(role_arn=pipe_obj.role)
 
-    if session == "session1":
-        from steps.preprocessing import preprocess
-
-        preprocess(base_dir=BASE_FILEPATH, data_filepath=DATA_FILEPATH)
-
-    elif session == "session2":
-        from steps.preprocessing import preprocess
-        from steps.training import train
-
-        preprocess(base_dir=BASE_FILEPATH, data_filepath=DATA_FILEPATH)
-        train(
-            base_directory=BASE_FILEPATH,
-            train_path=TRAIN_PATH,
-            validation_path=VALIDATION_PATH,
-            epochs=EPOCHS,
-        )
+    # Starting the pipeline
+    full_session_pipeline.start()

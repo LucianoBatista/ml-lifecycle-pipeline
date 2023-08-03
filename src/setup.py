@@ -9,10 +9,9 @@ def run():
     process_data_step = pipe_obj.preprocessing(
         job_name="penguins-preprocess-data-step",
         framework_version="0.23-1",
-        instance_type="ml.m5.xlarge",
+        instance_type="ml.t3.medium",
         instance_count=1,
         step_name="PreprocessDataStep",
-        script_path="steps/preprocess.py",
     )
     data_quality_baseline_step = pipe_obj.data_quality(process_data_step)
     tune_model_step = pipe_obj.tuning(process_data_step)
@@ -20,7 +19,9 @@ def run():
     evaluate_model_step = pipe_obj.evaluation(
         process_data_step, train_model_step, tune_model_step
     )
-    create_model_step = pipe_obj.create_model_step(tune_model_step, train_model_step)
+    create_model_step = pipe_obj.create_model_step(
+        process_data_step, tune_model_step, train_model_step
+    )
     generate_test_data_step = pipe_obj.test_predictions(
         process_data_step, create_model_step
     )
